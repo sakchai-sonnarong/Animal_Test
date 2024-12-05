@@ -31,7 +31,7 @@ class AnimalController extends Controller
             [
                 'name.required' => 'กรุณาระบุชื่อสัตว์ที่ต้องการเพิ่ม',
                 'name.max' => 'ชื่อสัตว์มีควาามยาวเกิน 50 ตัวอักษร',
-                'desc.required' => 'กรุณากรอกรายละเียดของสัตว์',
+                'desc.required' => 'กรุณากรอกรายละเอียดของสัตว์',
                 'quantity.required' => 'กรอกจำนวนของสัตว์ที่มี'
             ]
         );
@@ -66,7 +66,7 @@ class AnimalController extends Controller
             [
                 'name.required' => 'กรุณาระบุชื่อสัตว์ที่ต้องการเพิ่ม',
                 'name.max' => 'ชื่อสัตว์มีควาามยาวเกิน 50 ตัวอักษร',
-                'desc.required' => 'กรุณากรอกรายละเียดของสัตว์',
+                'desc.required' => 'กรุณากรอกรายละเอียดของสัตว์',
                 'quantity.required' => 'กรอกจำนวนของสัตว์ที่มี'
             ]
         );
