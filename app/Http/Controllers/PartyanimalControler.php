@@ -225,7 +225,7 @@ class PartyanimalControler extends Controller
         if ($result->isEmpty()) {
             return response()->json([
                 'success' => false,
-                'message' => 'ไม่พบข้อมูล',
+                'message' => 'ไม่พบข้อมูลที่ต้องการค้นหา',
                 'data' => []
             ], 404); // ส่ง HTTP 404 Not Found
         }
