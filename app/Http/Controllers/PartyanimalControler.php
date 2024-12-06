@@ -231,7 +231,7 @@ class PartyanimalControler extends Controller
         }
 
         return response()->json([
-            'message' => 'ค้นหา สำเร็จ',
+            'message' => 'Search Success',
             'data' => $result
         ]);
     }
