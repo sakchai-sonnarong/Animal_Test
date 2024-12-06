@@ -243,7 +243,7 @@ class PartyanimalControler extends Controller
                 'type_name' => 'required'
             ],
             [
-                'type_name.required' => 'กรูณากรอกประเภทสัตว์'
+                'type_name.required' => 'กรุณากรอกประเภทสัตว์'
             ]
         );
         $data = ['type_name' => $request->type_name];
