@@ -5,9 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Animal;
 use App\Models\AnimalType;
+use Haruncpi\LaravelIdGenerator\IdGenerator;
 use Illuminate\Auth\Events\Validated;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class PartyanimalControler extends Controller
 {
@@ -289,5 +291,152 @@ class PartyanimalControler extends Controller
                 ];
             })
         ]);
+    }
+
+    public function exportPDF($id)
+    {
+        $Item = Animal::where('id', $id)->first();
+
+
+
+        // ตรวจสอบว่ามีข้อมูลหรือไม่
+        if (!$Item) {
+            abort(404, 'Animal not found.');
+        }
+
+
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font_size' => 16,
+            'fontDir' => array_merge($fontDirs, [
+                base_path() . '/custom/font/directory',
+            ]),
+            'fontdata' => $fontData + [ // lowercase letters only in font key
+                'th-sarabun' => [
+                    'R' => 'THSarabun.ttf',
+                    'I' => 'THSarabun Italic.ttf',
+                    'B' => 'THSarabun Bold.ttf',
+                    'BI' => 'THSarabun BoldItalic.ttf',
+                ]
+            ],
+            'default_font' => 'th-sarabun',
+            // 'default_font' => 'sarabunTH',
+            'margin_left' => 5,
+            'margin_right' => 5,
+            'margin_top' => 5,
+            'margin_bottom' => 5,
+            'margin_header' => 5,
+            'margin_footer' => 5,
+        ]);
+        $mpdf->SetTitle('Data Animal');
+        $mpdf->AddPage();
+        $html = '
+        <h1>ข้อมูลสัตว์</h1>
+        <h3>ข้อมูลสัตว์ พร้อมรายละเอียดของสัตว์</h3>
+        <table style="width:100%;" margin-top:21px;>
+            <tbody>
+                <tr>
+                    <td>ชื่อสัตว์</td>
+                    <td>ข้อมูลสัตว์</td>
+                    <td>จำนวน</td>
+                    <td>ประเภท</td>
+                </tr>
+                <tr>
+                    <td>' . $Item->name . '</td>
+                    <td>' . $Item->desc . '</td>
+                    <td>' . $Item->quantity . '</td>
+                    <td>' . $Item->animalType->type_name . '</td>
+                </tr>
+            </tbody>
+        </table>';
+
+        $mpdf->WriteHTML($html);
+        $mpdf->Output();
+    }
+
+    public function exportPDFAll()
+    {
+        $Items = Animal::all();
+
+        $groupAnimals = $Items->groupBy(function ($typeanimal) {
+            return $typeanimal->animalType->type_name;
+        })->map(function ($group) {
+            return [
+                'total_quantity' => $group->sum('quantity'),  // คำนวณผลรวมของ quantity สำหรับแต่ละประเภท
+                'animals' => $group
+            ];
+        });
+
+        $animalCount = $Items->sum('quantity');
+
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $fontDirs = $defaultConfig['fontDir'];
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+        $fontData = $defaultFontConfig['fontdata'];
+
+        $mpdf = new \Mpdf\Mpdf([
+            'mode' => 'utf-8',
+            'format' => 'A4',
+            'default_font_size' => 18,
+            'fontDir' => array_merge($fontDirs, [
+                base_path() . '/custom/font/directory',
+            ]),
+            'fontdata' => $fontData + [ // lowercase letters only in font key
+                'th-sarabun' => [
+                    'R' => 'THSarabun.ttf',
+                    'I' => 'THSarabun Italic.ttf',
+                    'B' => 'THSarabun Bold.ttf',
+                    'BI' => 'THSarabun BoldItalic.ttf',
+                ]
+            ],
+            'default_font' => 'th-sarabun',
+            'margin_left' => 5,
+            'margin_right' => 5,
+            'margin_top' => 5,
+            'margin_bottom' => 5,
+            'margin_header' => 5,
+            'margin_footer' => 5,
+        ]);
+
+        $mpdf->SetTitle('Data Animal');
+        $mpdf->AddPage();
+        $html = '
+        <h2 style="text-align: center;">สัตว์ทั้งหมด</h2>';
+        foreach ($groupAnimals as $animaltype => $data) {
+            
+            $html .= '<h3>ประเภทสัตว์ : ' . $animaltype . ' </h3>';
+            $html .= '<h3>จำนวนของสัตว์ : ' . $data['total_quantity'] . ' ตัว </h3>';
+            $html .= '
+            <table style="width:100%; border: 1px solid black; border-collapse: collapse;">
+            <thead style="background-color: #4CAF50; color: white; font-size: 14px; font-weight: bold; text-align: center;">
+                <tr>
+                    <th style="border: 1px solid black; padding: 8px;">ชื่อสัตว์</th>
+                    <th style="border: 1px solid black; padding: 8px;">ข้อมูลสัตว์</th>
+                    <th style="border: 1px solid black; padding: 8px;">จำนวน</th>
+                </tr>
+            </thead>
+            <tbody>';
+
+            foreach ($data['animals'] as $animal) {
+                $html .= '
+                <tr style="text-align: center;">
+                    <td style="border: 1px solid black; padding: 8px; text-align: center;">' . $animal->name . '</td>
+                    <td style="border: 1px solid black; padding: 8px; text-align: center;">' . $animal->desc . '</td>
+                    <td style="border: 1px solid black; padding: 8px; text-align: center;">' . $animal->quantity . '</td>
+                </tr>';
+            }
+            $html .= '
+            </tbody>
+            </table>';
+        }
+
+        $mpdf->WriteHTML($html);
+        $mpdf->Output();
     }
 }

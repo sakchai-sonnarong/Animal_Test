@@ -17,6 +17,8 @@ Route::get('/getanimalid/{id}', [PartyanimalControler::class, 'getanimalid']);
 Route::post('/insertmore', [PartyanimalControler::class, 'insertmore']);
 Route::put('/updatemore', [PartyanimalControler::class, 'updatemore']);
 Route::get('/searchname', [PartyanimalControler::class, 'searchByName']);
+Route::get('/outputPDF/{id}', [PartyanimalControler::class, 'exportPDF']);
+Route::get('/allanimalPDF', [PartyanimalControler::class, 'exportPDFAll']);
 
 //type animal
 Route::post('/inserttype',[PartyanimalControler::class, 'inserttype']);
