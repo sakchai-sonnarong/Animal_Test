@@ -439,4 +439,11 @@ class PartyanimalControler extends Controller
         $mpdf->WriteHTML($html);
         $mpdf->Output();
     }
+
+
+    public function exportexcel(){
+        $data = Animal::all();
+
+        
+    }
 }
